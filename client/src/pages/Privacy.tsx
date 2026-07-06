@@ -31,7 +31,9 @@ export default function Privacy() {
         <section>
           <h2 className="font-display text-xl font-semibold text-ink">Contact</h2>
           <p className="mt-2">
-            Questions about your data? Message us on WhatsApp at +65 8866 6375.
+            Questions about your data? Message us on WhatsApp at +65 8866 6375, call +65 6100 0613, or
+            email enquiry@tertiaryinfotech.com. Tertiary Infotech Academy Pte Ltd, 12 Woodlands Square
+            #07-85/86/87 Woods Square Tower 1, Singapore 737715.
           </p>
         </section>
       </div>

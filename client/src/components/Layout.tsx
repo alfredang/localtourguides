@@ -164,10 +164,16 @@ export default function Layout() {
           <div>
             <h4 className="mb-3 font-semibold text-white">Contact</h4>
             <ul className="space-y-2 text-sm">
+              <li>12 Woodlands Square #07-85/86/87 Woods Square Tower 1, Singapore 737715</li>
+              <li>
+                <a href="tel:+6561000613" className="hover:text-amber-400">+65 6100 0613</a>
+              </li>
               <li>
                 <a href="https://wa.me/6588666375" className="hover:text-amber-400">WhatsApp +65 8866 6375</a>
               </li>
-              <li>Singapore</li>
+              <li>
+                <a href="mailto:enquiry@tertiaryinfotech.com" className="hover:text-amber-400">enquiry@tertiaryinfotech.com</a>
+              </li>
               <li><Link to="/privacy" className="hover:text-amber-400">Privacy Policy</Link></li>
             </ul>
           </div>
@@ -176,6 +182,18 @@ export default function Layout() {
           <p>
             © 2026 LocalTourGuides. All rights reserved. Guide personal data (NRIC, contact details) is
             never displayed publicly.
+          </p>
+          <p className="mt-1">
+            Powered by{' '}
+            <a
+              href="https://www.tertiaryinfotech.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-amber-400"
+            >
+              Tertiary Infotech Academy Pte Ltd
+            </a>{' '}
+            · UEN 201200696W
           </p>
         </div>
       </footer>
