@@ -1,0 +1,15 @@
+{
+  "name": "localtourguides",
+  "version": "1.0.0",
+  "private": true,
+  "description": "LocalTourGuides — marketplace connecting travellers with verified local tour guides",
+  "scripts": {
+    "dev": "concurrently -n server,client -c yellow,cyan \"npm run dev --prefix server\" \"npm run dev --prefix client\"",
+    "build": "npm run build --prefix client",
+    "start": "NODE_ENV=production node server/src/index.js",
+    "seed": "node server/src/seed-run.js"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}

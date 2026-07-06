@@ -1,0 +1,7 @@
+node_modules/
+dist/
+server/data/*.sqlite*
+server/uploads/
+.env
+.DS_Store
+.playwright-mcp/

@@ -1,0 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-cream text-ink font-sans antialiased;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-terra px-6 py-3 font-semibold text-white shadow-md transition hover:bg-terra-dark hover:shadow-lg;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border-2 border-terra px-6 py-3 font-semibold text-terra transition hover:bg-terra hover:text-white;
+  }
+  .section-title {
+    @apply font-display text-3xl font-semibold text-ink sm:text-4xl;
+  }
+  .prose-blog h2 {
+    @apply mt-8 mb-3 font-display text-2xl font-semibold text-ink;
+  }
+  .prose-blog p {
+    @apply mb-4 leading-relaxed text-ink/80;
+  }
+  .prose-blog ul {
+    @apply mb-4 list-disc pl-6 text-ink/80 space-y-1;
+  }
+  .prose-blog a {
+    @apply text-terra underline;
+  }
+}
+
+/* Hero collage: two columns drifting vertically, potluckhub-style */
+@keyframes scroll-y {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-50%);
+  }
+}
+.animate-scroll-slow {
+  animation: scroll-y 45s linear infinite;
+}
+.animate-scroll-slower {
+  animation: scroll-y 60s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-scroll-slow,
+  .animate-scroll-slower {
+    animation: none;
+  }
+}
