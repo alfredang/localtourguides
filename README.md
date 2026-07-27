@@ -6,6 +6,8 @@ A full-stack marketplace connecting travellers with **verified local tour guides
 
 **https://localtourguides.tertiaryinfotech.com**
 
+📱 iOS app on the App Store: **https://apps.apple.com/sg/app/localtourguides/id6787895187** (Android in closed testing)
+
 ![LocalTourGuides — home screen](screenshot.png)
 
 ## Features
@@ -22,7 +24,7 @@ A full-stack marketplace connecting travellers with **verified local tour guides
 - **Lead magnet** — free "48 Hours Like a Local" city-guide email capture with social share
 - **WhatsApp floating widget** — wa.me/6588666375 on every page
 - **Admin console** — verification approval queue and featured toggles
-- **REST API** — clean JSON API ready for the future iOS/Android apps
+- **REST API** — clean JSON API shared by the web client and the native mobile apps
 - **No faces policy** — all public imagery shows destinations, never portrait photos
 
 ## Tech Stack
