@@ -64,6 +64,9 @@ CREATE TABLE IF NOT EXISTS users (
   guide_id INTEGER,
   role TEXT NOT NULL DEFAULT 'guide',
   google_sub TEXT,
+  apple_sub TEXT,
+  display_name TEXT NOT NULL DEFAULT '',
+  is_private_relay INTEGER NOT NULL DEFAULT 0,
   avatar_url TEXT NOT NULL DEFAULT '',
   created_at ${TS} NOT NULL DEFAULT ${NOW}
 );
@@ -106,8 +109,19 @@ CREATE TABLE IF NOT EXISTS enquiries (
   group_size TEXT,
   message TEXT NOT NULL,
   status TEXT NOT NULL DEFAULT 'new',
+  -- Deliberately no FK: deleting a traveller must NOT cascade away the
+  -- guide's copy of the enquiry. Account deletion anonymises these instead.
+  user_id INTEGER,
   created_at ${TS} NOT NULL DEFAULT ${NOW}
 );
+CREATE TABLE IF NOT EXISTS saved_guides (
+  id ${PK},
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  guide_id INTEGER NOT NULL REFERENCES guides(id) ON DELETE CASCADE,
+  created_at ${TS} NOT NULL DEFAULT ${NOW}
+);
+CREATE UNIQUE INDEX IF NOT EXISTS saved_guides_user_guide_key ON saved_guides (user_id, guide_id);
+CREATE INDEX IF NOT EXISTS saved_guides_user_idx ON saved_guides (user_id);
 CREATE TABLE IF NOT EXISTS reviews (
   id ${PK},
   guide_id INTEGER NOT NULL REFERENCES guides(id) ON DELETE CASCADE,
@@ -169,6 +183,20 @@ async function migrate() {
   if (!userCols.has('avatar_url')) {
     await q("ALTER TABLE users ADD COLUMN avatar_url TEXT NOT NULL DEFAULT ''");
   }
+  if (!userCols.has('apple_sub')) {
+    await q('ALTER TABLE users ADD COLUMN apple_sub TEXT');
+  }
+  if (!userCols.has('display_name')) {
+    await q("ALTER TABLE users ADD COLUMN display_name TEXT NOT NULL DEFAULT ''");
+  }
+  if (!userCols.has('is_private_relay')) {
+    await q('ALTER TABLE users ADD COLUMN is_private_relay INTEGER NOT NULL DEFAULT 0');
+  }
+
+  const enquiryCols = await tableColumns('enquiries');
+  if (!enquiryCols.has('user_id')) {
+    await q('ALTER TABLE enquiries ADD COLUMN user_id INTEGER');
+  }
   // Google-only accounts have no password, so password_hash must be nullable.
   // Postgres can drop the constraint in place; SQLite cannot, so an old dev
   // database is rebuilt from a table copy. Both are no-ops once applied.
@@ -185,11 +213,16 @@ async function migrate() {
         guide_id INTEGER,
         role TEXT NOT NULL DEFAULT 'guide',
         google_sub TEXT,
+        apple_sub TEXT,
+        display_name TEXT NOT NULL DEFAULT '',
+        is_private_relay INTEGER NOT NULL DEFAULT 0,
         avatar_url TEXT NOT NULL DEFAULT '',
         created_at TEXT NOT NULL DEFAULT (datetime('now'))
       );
-      INSERT INTO users_new (id, email, password_hash, guide_id, role, google_sub, avatar_url, created_at)
-        SELECT id, email, password_hash, guide_id, role, google_sub, avatar_url, created_at FROM users;
+      INSERT INTO users_new (id, email, password_hash, guide_id, role, google_sub, apple_sub,
+                             display_name, is_private_relay, avatar_url, created_at)
+        SELECT id, email, password_hash, guide_id, role, google_sub, apple_sub,
+               display_name, is_private_relay, avatar_url, created_at FROM users;
       DROP TABLE users;
       ALTER TABLE users_new RENAME TO users;
       COMMIT;
@@ -201,6 +234,12 @@ async function migrate() {
   await q(
     'CREATE UNIQUE INDEX IF NOT EXISTS users_google_sub_key ON users (google_sub) WHERE google_sub IS NOT NULL'
   );
+  await q(
+    'CREATE UNIQUE INDEX IF NOT EXISTS users_apple_sub_key ON users (apple_sub) WHERE apple_sub IS NOT NULL'
+  );
+  // Must live here, not in SCHEMA: SCHEMA runs first, and on an existing
+  // database enquiries.user_id does not exist until the ALTER above.
+  await q('CREATE INDEX IF NOT EXISTS enquiries_user_id_idx ON enquiries (user_id)');
 }
 
 /** True when SQLite's users.password_hash still carries the old NOT NULL. */
