@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/auth';
+import GoogleSignInButton from '../components/GoogleSignInButton';
 
 export default function Login() {
   const { login } = useAuth();
@@ -45,6 +46,7 @@ export default function Login() {
         />
         {error && <p className="text-sm text-red-600">{error}</p>}
         <button type="submit" className="btn-primary w-full">Log in</button>
+        <GoogleSignInButton text="signin_with" />
         <p className="text-center text-sm text-ink/60">
           New here?{' '}
           <Link to="/signup" className="font-semibold text-terra hover:underline">

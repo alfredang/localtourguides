@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/auth';
 import { destinations } from '../data/destinations';
+import GoogleSignInButton from '../components/GoogleSignInButton';
 
 export default function Signup() {
   const { signup } = useAuth();
@@ -71,6 +72,10 @@ export default function Signup() {
         </div>
         {error && <p className="text-sm text-red-600">{error}</p>}
         <button type="submit" className="btn-primary w-full">Create my free listing</button>
+        <GoogleSignInButton text="signup_with" />
+        <p className="text-center text-xs text-ink/50">
+          Signing up with Google sets your base city to Singapore — change it any time in your dashboard.
+        </p>
         <p className="text-center text-sm text-ink/60">
           Already listed?{' '}
           <Link to="/login" className="font-semibold text-terra hover:underline">Log in</Link>

@@ -11,6 +11,7 @@ interface AuthContextValue {
   session: Session | null;
   login: (email: string, password: string) => Promise<Session>;
   signup: (payload: { name: string; email: string; password: string; country: string; city: string }) => Promise<Session>;
+  loginWithGoogle: (credential: string) => Promise<Session>;
   logout: () => void;
 }
 
@@ -48,6 +49,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return s;
   }
 
+  async function loginWithGoogle(credential: string) {
+    const s = await api<Session>('/auth/google', {
+      method: 'POST',
+      body: JSON.stringify({ credential }),
+    });
+    storeSession(s);
+    setSession(s);
+    return s;
+  }
+
   function logout() {
     localStorage.removeItem('ltg_token');
     localStorage.removeItem('ltg_role');
@@ -55,7 +66,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSession(null);
   }
 
-  return <AuthContext.Provider value={{ session, login, signup, logout }}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{ session, login, signup, loginWithGoogle, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth() {

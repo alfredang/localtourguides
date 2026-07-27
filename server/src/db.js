@@ -60,9 +60,11 @@ const SCHEMA = `
 CREATE TABLE IF NOT EXISTS users (
   id ${PK},
   email TEXT UNIQUE NOT NULL,
-  password_hash TEXT NOT NULL,
+  password_hash TEXT,
   guide_id INTEGER,
   role TEXT NOT NULL DEFAULT 'guide',
+  google_sub TEXT,
+  avatar_url TEXT NOT NULL DEFAULT '',
   created_at ${TS} NOT NULL DEFAULT ${NOW}
 );
 CREATE TABLE IF NOT EXISTS guides (
@@ -149,6 +151,76 @@ export async function initSchema() {
   } else {
     sqlite.exec(SCHEMA);
   }
+  await migrate();
+}
+
+/**
+ * Additive migrations for databases created before a column existed.
+ * SCHEMA only runs CREATE TABLE IF NOT EXISTS, so an existing production
+ * database never picks up new columns without this step. Every statement
+ * must be safe to run repeatedly.
+ */
+async function migrate() {
+  const userCols = await tableColumns('users');
+
+  if (!userCols.has('google_sub')) {
+    await q('ALTER TABLE users ADD COLUMN google_sub TEXT');
+  }
+  if (!userCols.has('avatar_url')) {
+    await q("ALTER TABLE users ADD COLUMN avatar_url TEXT NOT NULL DEFAULT ''");
+  }
+  // Google-only accounts have no password, so password_hash must be nullable.
+  // Postgres can drop the constraint in place; SQLite cannot, so an old dev
+  // database is rebuilt from a table copy. Both are no-ops once applied.
+  if (usePg) {
+    await q('ALTER TABLE users ALTER COLUMN password_hash DROP NOT NULL');
+  } else if (passwordHashIsNotNull()) {
+    sqlite.exec(`
+      PRAGMA foreign_keys = OFF;
+      BEGIN;
+      CREATE TABLE users_new (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        email TEXT UNIQUE NOT NULL,
+        password_hash TEXT,
+        guide_id INTEGER,
+        role TEXT NOT NULL DEFAULT 'guide',
+        google_sub TEXT,
+        avatar_url TEXT NOT NULL DEFAULT '',
+        created_at TEXT NOT NULL DEFAULT (datetime('now'))
+      );
+      INSERT INTO users_new (id, email, password_hash, guide_id, role, google_sub, avatar_url, created_at)
+        SELECT id, email, password_hash, guide_id, role, google_sub, avatar_url, created_at FROM users;
+      DROP TABLE users;
+      ALTER TABLE users_new RENAME TO users;
+      COMMIT;
+      PRAGMA foreign_keys = ON;
+    `);
+  }
+  // Partial unique index: many accounts may have google_sub NULL (password-only),
+  // but a given Google subject may map to at most one account.
+  await q(
+    'CREATE UNIQUE INDEX IF NOT EXISTS users_google_sub_key ON users (google_sub) WHERE google_sub IS NOT NULL'
+  );
+}
+
+/** True when SQLite's users.password_hash still carries the old NOT NULL. */
+function passwordHashIsNotNull() {
+  const rows = sqlite.prepare('PRAGMA table_info(users)').all();
+  const col = rows.find((r) => String(r.name).toLowerCase() === 'password_hash');
+  return !!col && col.notnull === 1;
+}
+
+/** Column names of a table, lowercased. */
+async function tableColumns(table) {
+  if (usePg) {
+    const rows = await q(
+      'SELECT column_name FROM information_schema.columns WHERE table_name = $1',
+      [table]
+    );
+    return new Set(rows.map((r) => String(r.column_name).toLowerCase()));
+  }
+  const rows = sqlite.prepare(`PRAGMA table_info(${table})`).all();
+  return new Set(rows.map((r) => String(r.name).toLowerCase()));
 }
 
 export async function recomputeRating(guideId) {

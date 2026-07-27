@@ -19,6 +19,7 @@ A full-stack marketplace connecting travellers with **verified local tour guides
 - **Trust-first search ranking** — Featured → Verified → rating, on every search
 - **Verification flow** — selfie + NRIC upload → live online interview → green ✓ badge (documents are private, never displayed or served publicly)
 - **Free guide accounts** — profile + one itinerary, enquiries inbox in the dashboard
+- **Google Sign-In** — one-tap login/signup alongside email + password; a first-time Google email creates the guide account, and an existing password account with the same verified address is linked rather than duplicated
 - **Enquiry portal** — travellers contact guides without exposing anyone's personal details
 - **The Travel Table blog** — 30 posts with categories and social share buttons
 - **Lead magnet** — free "48 Hours Like a Local" city-guide email capture with social share
@@ -49,6 +50,10 @@ npm run dev
 ```
 
 Open http://localhost:5173. With no `DATABASE_URL` set, a local SQLite database is created and seeded automatically on first boot (28 guides, 30 blog posts, demo accounts). Set `DATABASE_URL=postgres://...` to run against PostgreSQL instead.
+
+### Google Sign-In (optional)
+
+Copy `.env.example` to `.env` and set both `GOOGLE_CLIENT_ID` (server — checks the token audience) and `VITE_GOOGLE_CLIENT_ID` (client — renders the button) to the same OAuth **Web application** client id from the [Google Cloud console](https://console.cloud.google.com/apis/credentials), with `http://localhost:5173` and the production origin registered as authorised JavaScript origins. Leave them unset and the Google button is simply hidden — email + password login is unaffected.
 
 ### Demo accounts
 
