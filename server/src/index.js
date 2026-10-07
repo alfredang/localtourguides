@@ -8,6 +8,7 @@ import publicRoutes from './routes/public.js';
 import authRoutes from './routes/auth.js';
 import meRoutes from './routes/me.js';
 import adminRoutes from './routes/admin.js';
+import { mountSeo } from './seo.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -24,7 +25,7 @@ app.use('/api/admin', adminRoutes);
 const dist = path.join(__dirname, '..', '..', 'client', 'dist');
 if (fs.existsSync(dist)) {
   app.use(express.static(dist));
-  app.get(/^(?!\/api).*/, (_req, res) => res.sendFile(path.join(dist, 'index.html')));
+  mountSeo(app, dist);
 }
 
 app.use((err, _req, res, _next) => {
