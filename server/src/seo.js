@@ -66,9 +66,13 @@ function render(shell, urlPath, meta) {
 export function mountSeo(app, dist) {
   const shell = fs.readFileSync(path.join(dist, 'index.html'), 'utf8');
 
+  // The public pages fetch their content from /api at render time. Googlebot's
+  // renderer obeys robots.txt for those fetches, so a blanket Disallow: /api/
+  // made every guide/blog page render "Guide not found" -> GSC Soft 404. Allow
+  // the public read endpoints (longest match wins); private ones stay blocked.
   app.get('/robots.txt', (_req, res) => {
     res.type('text/plain').send(
-      `User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /dashboard\nDisallow: /admin\n\nSitemap: ${SITE}/sitemap.xml\n`
+      `User-agent: *\nAllow: /\nAllow: /api/guides\nAllow: /api/blog\nAllow: /api/tours\nAllow: /api/stats\nDisallow: /api/\nDisallow: /dashboard\nDisallow: /admin\n\nSitemap: ${SITE}/sitemap.xml\n`
     );
   });
 
