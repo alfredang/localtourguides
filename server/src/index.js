@@ -16,6 +16,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Bare /api has no handler and Search Console reports it as a 404.
+app.get('/api', (_req, res) => res.redirect(301, '/'));
+
 app.use('/api', publicRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/me', meRoutes);
