@@ -42,7 +42,7 @@ Demo accounts (seeded): `demo@localtourguides.com`/`guide123` (guide, linked to 
 
 Sky-blue travel palette defined as Tailwind tokens in `client/tailwind.config.js`: `terra` (#0284C7 primary — the name is legacy, it renders sky blue), `cream`/`sand` (ice-blue surfaces/borders), `ink` (deep navy), warm amber accents for stars/Featured. Display font Fraunces, body Inter. Reusable pieces (`btn-primary`, `section-title`, cards, badges, stars) live in `client/src/index.css` and `src/components/Shared.tsx` — reuse them rather than restyling ad hoc. Section rhythm is `py-10` with alternating `bg-sky-50/70` bands; keep spacing tight (the user explicitly dislikes dead space).
 
-`.claude/skills/` has house workflows (`reseed-db`, `marketplace-content`) plus imported design/marketing skills (`frontend-design`, `ui-ux-pro-max`, `lead-magnets`, `travel-planner` — symlinked from `.agents/skills/`). Content edits should follow `marketplace-content`; big UI work should consult `frontend-design`.
+`.claude/skills/` has house workflows (`reseed-db`, `marketplace-content`) plus imported design/marketing skills (`tia-frontend-design-site`, `ui-ux-pro-max`, `lead-magnets`, `travel-planner` — symlinked from `.agents/skills/`). Content edits should follow `marketplace-content`; big UI work should consult `tia-frontend-design-site`.
 
 ## Roadmap context
 

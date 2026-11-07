@@ -12,7 +12,7 @@ Content lives in seed files ([server/src/seed/guides.js](../../../server/src/see
 - Warm, first-person, specific — "part history lesson, part feast", never brochure-speak. Model the tone on existing entries.
 - Itineraries sell a *local's* perspective: named stalls, streets, aunties, times of day. 4–6 chronological stops with `time`, `place`, `description` (20–40 words).
 - Blog posts: markdown, 350–550 words, `##` subheadings, one bulleted list, end with a nudge toward finding a local guide. Categories: City Guides, Food & Culture, Hidden Gems, Travel Tips, Guide Stories (Guide Stories are authored by a real seeded guide).
-- For deep destination/itinerary research, also load the imported `travel-planner` skill; for landing-page copy, `frontend-design` and `lead-magnets`.
+- For deep destination/itinerary research, also load the imported `travel-planner` skill; for landing-page copy, `tia-frontend-design-site` and `lead-magnets`.
 
 ## Hard rules
 
