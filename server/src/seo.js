@@ -21,6 +21,60 @@ const clip = (s, n = 158) => {
 
 const STATIC_PAGES = ['/', '/guides', '/blog', '/how-it-works', '/verification', '/privacy'];
 
+// Every indexable SPA route needs its own title + self-canonical. Before this,
+// these pages got the bare shell (homepage title, no canonical), so GSC grouped
+// them as "Duplicate without user-selected canonical".
+const STATIC_META = {
+  '/': {
+    title: `${BRAND} — Explore Like a Local, With a Local`,
+    description: 'Book verified local tour guides across Asia for private, personalised tours and itineraries built by people who live there.',
+    body: '<h1>Explore like a local, with a local</h1><p>Book verified local tour guides for private, personalised tours.</p>',
+  },
+  '/guides': {
+    title: `Find a Local Tour Guide | ${BRAND}`,
+    description: 'Browse verified local tour guides by city and country, compare itineraries and book a private tour with a local.',
+    body: '<h1>Find a local tour guide</h1><p>Browse verified local guides by city and country.</p>',
+  },
+  '/blog': {
+    title: `Travel Blog — Local Tips and Itineraries | ${BRAND}`,
+    description: 'Travel tips, local insights and itinerary ideas from the guides on LocalTourGuides.',
+    body: '<h1>Travel blog</h1><p>Local tips and itinerary ideas from our guides.</p>',
+  },
+  '/how-it-works': {
+    title: `How It Works | ${BRAND}`,
+    description: 'How booking a local tour guide works on LocalTourGuides, from finding a guide to planning your tour.',
+    body: '<h1>How it works</h1><p>Find a verified local guide, plan your tour together and explore like a local.</p>',
+  },
+  '/verification': {
+    title: `Guide Verification | ${BRAND}`,
+    description: 'How LocalTourGuides verifies the identity and credentials of every local tour guide on the platform.',
+    body: '<h1>Guide verification</h1><p>How we verify every local tour guide.</p>',
+  },
+  '/privacy': {
+    title: `Privacy Policy | ${BRAND}`,
+    description: 'How LocalTourGuides collects, uses and protects your personal data.',
+    body: '<h1>Privacy policy</h1>',
+  },
+};
+
+const titleCase = (slug) =>
+  String(slug).split('-').filter(Boolean).map((w) => w[0].toUpperCase() + w.slice(1)).join(' ');
+
+function destinationMeta(slug) {
+  const name = titleCase(slug);
+  return {
+    title: `Local Tour Guides in ${name} | ${BRAND}`,
+    description: `Book a verified local tour guide in ${name} for a private, personalised tour.`,
+    body: `<h1>Local tour guides in ${esc(name)}</h1>`,
+  };
+}
+
+// Auth/app screens and unknown paths: still served as the SPA shell (so new
+// client routes keep working) but noindex, so they never compete with the
+// homepage as duplicates.
+const NOINDEX = (title) => ({ title: title ? `${title} | ${BRAND}` : BRAND, description: '', body: '', noindex: true });
+const APP_PAGES = { '/login': 'Log in', '/signup': 'Sign up', '/dashboard': 'Dashboard', '/admin': 'Admin' };
+
 async function guideMeta(slug) {
   const g = await get1('SELECT * FROM guides WHERE slug = $1', [slug]);
   if (!g) return null;
@@ -60,7 +114,7 @@ function render(shell, urlPath, meta) {
   return shell
     .replace(/<meta\s+name="description"[\s\S]*?\/>\s*/, '')
     .replace(/<title>[\s\S]*?<\/title>/, head)
-    .replace('<div id="root"></div>', `<div id="root">${meta.body}</div>`);
+    .replace('<div id="root"></div>', `<div id="root">${meta.body || ''}</div>`);
 }
 
 export function mountSeo(app, dist) {
@@ -102,7 +156,18 @@ export function mountSeo(app, dist) {
     let meta = null;
     let status = 200;
     try {
-      const m = req.path.match(/^\/(guides|blog)\/([^/]+)\/?$/);
+      const p = req.path.length > 1 ? req.path.replace(/\/+$/, '') : req.path;
+      const m = p.match(/^\/(guides|blog)\/([^/]+)$/);
+      const d = p.match(/^\/destinations\/([a-z0-9-]+)$/);
+      if (STATIC_META[p]) {
+        meta = STATIC_META[p];
+      } else if (d) {
+        meta = destinationMeta(d[1]);
+      } else if (APP_PAGES[p]) {
+        meta = NOINDEX(APP_PAGES[p]);
+      } else if (!m) {
+        meta = NOINDEX(null);
+      }
       if (m) {
         meta = m[1] === 'guides' ? await guideMeta(decodeURIComponent(m[2])) : await postMeta(decodeURIComponent(m[2]));
         if (!meta) {
@@ -114,6 +179,6 @@ export function mountSeo(app, dist) {
       console.error('[seo] meta lookup failed', err);
       meta = null; // fall back to the plain shell rather than failing the page
     }
-    res.status(status).type('html').send(render(shell, req.path, meta));
+    res.status(status).type('html').send(render(shell, req.path.length > 1 ? req.path.replace(/\/+$/, '') : req.path, meta));
   });
 }
