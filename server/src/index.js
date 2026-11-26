@@ -27,7 +27,9 @@ app.use('/api/admin', adminRoutes);
 // Serve the built client in production. uploads/ is intentionally never exposed.
 const dist = path.join(__dirname, '..', '..', 'client', 'dist');
 if (fs.existsSync(dist)) {
-  app.use(express.static(dist));
+  // index:false so "/" falls through to mountSeo (canonical + meta) instead of
+  // the bare index.html shell.
+  app.use(express.static(dist, { index: false }));
   mountSeo(app, dist);
 }
 
